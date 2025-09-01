@@ -1,0 +1,15 @@
+{
+  "name": "tiktok-backend",
+  "version": "1.0.0",
+  "description": "Backend for TikTok Video Downloader",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "axios": "^1.4.0",
+    "tiktok-scraper": "^1.5.0"
+  } 
+}
