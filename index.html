@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TikTok Video Downloader</title>
+<style>
+/* --- same CSS you already had --- */
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #f0f2f5;
+  min-height: 120vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 80px 8px;
+  color: #333;
+}
+.container {
+  background: #fff;
+  padding: 30px 25px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+h2 { text-align: center; font-weight: 600; color: #222; }
+.input-wrapper { position: relative; }
+input {
+  width: 100%;
+  padding: 18px 50px 18px 16px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  font-size: 18px;
+  height: 50px;
+}
+input:focus { border-color: #4a90e2; outline: none; }
+.input-icon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 26px;
+  color: #888;
+  cursor: pointer;
+  user-select: none;
+  transition: 0.2s;
+}
+.input-icon:hover { color: #ff4d4f; }
+button {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  border: none;
+  background: #4a90e2;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+button:hover { background: #357ab7; }
+#results {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.download-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22px 28px;
+  background: #f7f9fc;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  text-decoration: none;
+  color: #333;
+  transition: all 0.3s ease;
+  gap: 12px;
+  font-size: 16px;
+}
+.download-card:hover { background: #e6f0ff; }
+.download-info { display: flex; align-items: center; gap: 12px; }
+.tiktok-logo { width: 30px; height: 30px; }
+.copy-btn {
+  background: #4a90e2;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #fff;
+  transition: 0.3s;
+}
+.copy-btn:hover { background: #357ab7; }
+#preview {
+  width: 100%;
+  border-radius: 15px;
+  display: none;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+.spinner {
+  border: 4px solid rgba(0,0,0,0.1);
+  border-top: 4px solid #4a90e2;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
+@keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
+@media (max-width: 520px) {
+  .container { padding: 25px 20px; }
+  input { font-size: 16px; padding: 16px 50px 16px 14px; height: 48px; }
+  .input-icon { font-size: 28px; }
+  button { font-size: 16px; padding: 14px; }
+  .download-card { padding: 20px 25px; font-size: 15px; }
+  .tiktok-logo { width: 28px; height: 28px; }
+  .copy-btn { padding: 7px 12px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>TikTok Video Downloader</h2>
+
+  <div class="input-wrapper">
+    <input type="text" id="videoUrl" placeholder="Paste TikTok video URL">
+    <span class="input-icon" id="inputIcon">×</span>
+  </div>
+
+  <button id="downloadBtn">Get Video</button>
+
+  <div id="results"></div>
+
+  <video id="preview" controls></video>
+</div>
+
+<script>
+const videoInput = document.getElementById("videoUrl");
+const inputIcon = document.getElementById("inputIcon");
+const downloadBtn = document.getElementById("downloadBtn");
+const resultsDiv = document.getElementById("results");
+const previewVideo = document.getElementById("preview");
+
+// Clear input
+inputIcon.addEventListener("click", () => {
+  videoInput.value = "";
+  resultsDiv.innerHTML = "";
+  previewVideo.style.display = "none";
+  previewVideo.src = "";
+});
+
+// Fetch video from backend
+downloadBtn.addEventListener("click", () => {
+  const videoUrl = videoInput.value.trim();
+  if (!videoUrl) { alert("Please paste a TikTok URL!"); return; }
+
+  resultsDiv.innerHTML = '<div class="spinner"></div>';
+  previewVideo.style.display = "none";
+  previewVideo.src = "";
+
+  fetch("https://your-backend.onrender.com/download", { // << replace with your Render backend URL
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url: videoUrl })
+  })
+  .then(res => res.json())
+  .then(data => {
+    resultsDiv.innerHTML = "";
+    if (data.success) {
+      // Show preview video
+      previewVideo.src = data.videoUrl;
+      previewVideo.style.display = "block";
+
+      // Video card
+      const videoCard = document.createElement("a");
+      videoCard.className = "download-card";
+      videoCard.href = data.videoUrl;
+      videoCard.target = "_blank";
+      videoCard.innerHTML = `
+        <div class="download-info">
+          <img src="https://upload.wikimedia.org/wikipedia/en/6/6e/TikTok_logo.svg" class="tiktok-logo">
+          <span>Download Video (MP4)</span>
+        </div>
+      `;
+      resultsDiv.appendChild(videoCard);
+
+      // Music card
+      if (data.music) {
+        const musicCard = document.createElement("a");
+        musicCard.className = "download-card";
+        musicCard.href = data.music;
+        musicCard.target = "_blank";
+        musicCard.innerHTML = `
+          <div class="download-info">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Musical_note_icon.svg" class="tiktok-logo">
+            <span>Download Music (MP3)</span>
+          </div>
+        `;
+        resultsDiv.appendChild(musicCard);
+      }
+    } else {
+      resultsDiv.textContent = "No download link found. Try another TikTok URL.";
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    resultsDiv.textContent = "Error fetching video.";
+  });
+});
+</script>
+
+</body>
+</html>
