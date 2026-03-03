@@ -1,0 +1,4 @@
+Flask==2.3.3
+Flask-Cors==3.0.10
+yt-dlp==2026.2.20
+python-dotenv==1.1.1
